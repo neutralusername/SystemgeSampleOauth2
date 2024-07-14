@@ -9,7 +9,7 @@ import (
 	"Systemge/Oauth2"
 	"Systemge/Resolver"
 	"Systemge/Utilities"
-	"SystemgeSamplePingPong/appHTTP"
+	"SystemgeSamplePingPong/appWebsocketHTTP"
 	"context"
 	"encoding/json"
 
@@ -25,15 +25,15 @@ func main() {
 		Randomizer:              randomizer,
 		Oauth2State:             randomizer.GenerateRandomString(16, Utilities.ALPHA_NUMERIC),
 		SessionLifetimeMs:       15000,
-		Port:                    8081,
-		AuthPath:                "/auth",
+		Port:                    8080,
+		AuthPath:                "/",
 		AuthCallbackPath:        "/callback",
-		SucessCallbackRedirect:  "http://localhost:8080",
+		SucessCallbackRedirect:  "http://localhost:8081",
 		FailureCallbackRedirect: "http://chatgpt.com",
 		OAuth2Config: &oauth2.Config{
 			ClientID:     "1261641608886222908",
 			ClientSecret: "xD",
-			RedirectURL:  "http://localhost:8081/callback",
+			RedirectURL:  "http://localhost:8080/callback",
 			Scopes:       []string{"identify"},
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  "https://discord.com/api/oauth2/authorize",
@@ -54,7 +54,7 @@ func main() {
 	Module.StartCommandLineInterface(Module.NewMultiModule(
 		Broker.New(Config.ParseBrokerConfigFromFile("brokerHTTP.systemge")),
 		oauth2Server,
-		Node.New(Config.ParseNodeConfigFromFile("nodeHTTP.systemge"), appHTTP.New(oauth2Server)),
+		Node.New(Config.ParseNodeConfigFromFile("nodeHTTP.systemge"), appWebsocketHTTP.New(oauth2Server)),
 	))
 }
 

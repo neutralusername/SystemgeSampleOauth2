@@ -2,32 +2,40 @@ export class root extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-                WS_CONNECTION: new WebSocket("ws://localhost:8443/ws"),
-                constructMessage: (topic, payload) => {
-                    return JSON.stringify({
-                        topic: topic,
-                        payload: payload,
-                    });
-                },
-                setStateRoot: (state) => {
-                    this.setState(state)
-                }
+            username: "",
+            WS_CONNECTION: new WebSocket("ws://localhost:8443/ws"),
+            constructMessage: (topic, payload) => {
+                return JSON.stringify({
+                    topic: topic,
+                    payload: payload,
+                });
             },
-            (this.state.WS_CONNECTION.onmessage = (event) => {
-                let message = JSON.parse(event.data);
-                switch (message.topic) {
-                    case "pong":
-                        console.log("PONG")
-                        break;
-                    case "error":
-                        let errorMessage = message.payload.split("->").reverse()[0]
-                        console.log(errorMessage)
-                        break;
-                    default:
-                        console.log("Unknown message topic: " + event.data);
-                        break;
-                }
-            });
+            setStateRoot: (state) => {
+                this.setState(state)
+            }
+        },
+        (this.state.WS_CONNECTION.onmessage = (event) => {
+            let message = JSON.parse(event.data);
+            switch (message.topic) {
+                case "auth":
+                    let params = new URL(document.location.toString()).searchParams;
+                    let sessionId = params.get("sessionId");
+                    window.history.replaceState({}, document.title, "/");
+                    this.state.WS_CONNECTION.send(this.state.constructMessage("auth", sessionId));
+                    break;
+                case "username":
+                    this.state.setStateRoot({
+                        username : message.payload,
+                    })
+                case "error":
+                    let errorMessage = message.payload.split("->").reverse()[0]
+                    console.log(errorMessage)
+                    break;
+                default:
+                    console.log("Unknown message topic: " + event.data);
+                    break;
+            }
+        });
         this.state.WS_CONNECTION.onclose = () => {
             setTimeout(() => {
                 if (this.state.WS_CONNECTION.readyState === WebSocket.CLOSED) {}
@@ -60,7 +68,7 @@ export class root extends React.Component {
                     userSelect: "none",
                 },
             },
-            "Hello, world!"
+            "Hello, ", this.state.username
         );
     }
 }
