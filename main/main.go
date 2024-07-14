@@ -40,8 +40,24 @@ func main() {
 				TokenURL: "https://discord.com/api/oauth2/token",
 			},
 		},
-		Logger:       Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
-		TokenHandler: tokenHandler,
+		Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
+		TokenHandler: func(oauth2Server *Oauth2.Server, token *oauth2.Token) (string, map[string]interface{}, error) {
+			client := oauth2Server.GetOauth2Config().Client(context.Background(), token)
+			resp, err := client.Get("https://discord.com/api/users/@me")
+			if err != nil {
+				return "", nil, Error.New("failed getting user", err)
+			}
+			defer resp.Body.Close()
+
+			var discordAuthData map[string]interface{}
+			if err := json.NewDecoder(resp.Body).Decode(&discordAuthData); err != nil {
+				return "", nil, Error.New("failed decoding user", err)
+			}
+			if discordAuthData["username"] == nil {
+				return "", nil, Error.New("failed getting session identity", nil)
+			}
+			return discordAuthData["username"].(string), discordAuthData, nil
+		},
 	}).NewServer()
 	if err != nil {
 		panic(err)
@@ -56,22 +72,4 @@ func main() {
 		oauth2Server,
 		Node.New(Config.ParseNodeConfigFromFile("nodeHTTP.systemge"), appWebsocketHTTP.New(oauth2Server)),
 	))
-}
-
-func tokenHandler(oauth2Server *Oauth2.Server, token *oauth2.Token) (string, map[string]interface{}, error) {
-	client := oauth2Server.GetOauth2Config().Client(context.Background(), token)
-	resp, err := client.Get("https://discord.com/api/users/@me")
-	if err != nil {
-		return "", nil, Error.New("failed getting user", err)
-	}
-	defer resp.Body.Close()
-
-	var discordAuthData map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&discordAuthData); err != nil {
-		return "", nil, Error.New("failed decoding user", err)
-	}
-	if discordAuthData["username"] == nil {
-		return "", nil, Error.New("failed getting session identity", nil)
-	}
-	return discordAuthData["username"].(string), discordAuthData, nil
 }
