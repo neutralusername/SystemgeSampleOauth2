@@ -52,6 +52,15 @@ export class root extends React.Component {
                         username : "",
                     })
                     break;
+                case "logoutSuccess":
+                    document.cookie = "sessionId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                    this.state.setStateRoot({
+                        username : "",
+                    })
+                    break;
+                case "logoutFailure":
+                    console.log("Logout failed");
+                    break;
                 default:
                     console.log("Unknown message topic: " + event.data);
                     break;
@@ -105,7 +114,16 @@ export class root extends React.Component {
             }, "authorize") : 
             React.createElement("button", {
                 onClick: () => {
-                    window.location.href = "http://localhost:8080";
+                    let cookies = document.cookie.split("; ");
+                    let sessionId = "";
+                    for (let i = 0; i < cookies.length; i++) {
+                        let cookie = cookies[i].split("=");
+                        if (cookie[0] == "sessionId") {
+                            sessionId = cookie[1];
+                            break;
+                        }
+                    }
+                    this.state.WS_CONNECTION.send(this.state.constructMessage("logoutAttempt", sessionId));
                 },
                 style: {
                     marginTop: "10px",

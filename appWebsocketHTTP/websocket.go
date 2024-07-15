@@ -23,6 +23,16 @@ func (app *AppWebsocketHTTP) GetWebsocketMessageHandlers() map[string]Node.Webso
 			websocketClient.Send(Message.NewAsync("authSuccess", node.GetName(), username.(string)).Serialize())
 			return nil
 		},
+		"logoutAttempt": func(node *Node.Node, websocketClient *Node.WebsocketClient, message *Message.Message) error {
+			session := app.oauth2Server.GetSession(message.GetPayload())
+			if session == nil {
+				websocketClient.Send(Message.NewAsync("logoutFailure", node.GetName(), "session not found").Serialize())
+				return nil
+			}
+			app.oauth2Server.Expire(session)
+			websocketClient.Send(Message.NewAsync("logoutSuccess", node.GetName(), "").Serialize())
+			return nil
+		},
 	}
 }
 
