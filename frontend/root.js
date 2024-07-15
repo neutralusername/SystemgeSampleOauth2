@@ -17,22 +17,6 @@ export class root extends React.Component {
         (this.state.WS_CONNECTION.onmessage = (event) => {
             let message = JSON.parse(event.data);
             switch (message.topic) {
-                case "authRequest": {
-                    let params = new URL(document.location.toString()).searchParams;
-                    let sessionId = params.get("sessionId");
-                    if (!sessionId) {
-                        let cookies = document.cookie.split("; ");
-                        for (let i = 0; i < cookies.length; i++) {
-                            let cookie = cookies[i].split("=");
-                            if (cookie[0] == "sessionId") {
-                                sessionId = cookie[1];
-                                break;
-                            }
-                        }
-                    }
-                    this.state.WS_CONNECTION.send(this.state.constructMessage("authAttempt", sessionId));
-                    break;
-                }
                 case "authSuccess": {
                     let params = new URL(document.location.toString()).searchParams;
                     let sessionId = params.get("sessionId");
@@ -73,6 +57,19 @@ export class root extends React.Component {
             }, 2000);
         };
         this.state.WS_CONNECTION.onopen = () => {
+            let params = new URL(document.location.toString()).searchParams;
+            let sessionId = params.get("sessionId");
+            if (!sessionId) {
+                let cookies = document.cookie.split("; ");
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].split("=");
+                    if (cookie[0] == "sessionId") {
+                        sessionId = cookie[1];
+                        break;
+                    }
+                }
+            }
+            this.state.WS_CONNECTION.send(this.state.constructMessage("authAttempt", sessionId));
             let myLoop = () => {
                 this.state.WS_CONNECTION.send(this.state.constructMessage("heartbeat", ""));
                 setTimeout(myLoop, 15 * 1000);
