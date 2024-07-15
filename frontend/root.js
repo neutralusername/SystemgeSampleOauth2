@@ -17,19 +17,40 @@ export class root extends React.Component {
         (this.state.WS_CONNECTION.onmessage = (event) => {
             let message = JSON.parse(event.data);
             switch (message.topic) {
-                case "auth":
+                case "authRequest": {
                     let params = new URL(document.location.toString()).searchParams;
                     let sessionId = params.get("sessionId");
-                    window.history.replaceState({}, document.title, "/");
-                    this.state.WS_CONNECTION.send(this.state.constructMessage("auth", sessionId));
+                    if (!sessionId) {
+                        let cookies = document.cookie.split("; ");
+                        for (let i = 0; i < cookies.length; i++) {
+                            let cookie = cookies[i].split("=");
+                            if (cookie[0] == "sessionId") {
+                                sessionId = cookie[1];
+                                break;
+                            }
+                        }
+                    }
+                    this.state.WS_CONNECTION.send(this.state.constructMessage("authAttempt", sessionId));
                     break;
-                case "username":
+                }
+                case "authSuccess": {
+                    let params = new URL(document.location.toString()).searchParams;
+                    let sessionId = params.get("sessionId");
+                    if (sessionId) {
+                        document.cookie = "sessionId=" + sessionId + "; path=/";
+                    }
+                    window.history.replaceState({}, document.title, "/");
                     this.state.setStateRoot({
                         username : message.payload,
                     })
-                case "error":
-                    let errorMessage = message.payload.split("->").reverse()[0]
-                    console.log(errorMessage)
+                    break;
+                }
+                case "authFailure":
+                    document.cookie = "sessionId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                    window.history.replaceState({}, document.title, "/");
+                    this.state.setStateRoot({
+                        username : "",
+                    })
                     break;
                 default:
                     console.log("Unknown message topic: " + event.data);
@@ -81,7 +102,20 @@ export class root extends React.Component {
                     borderRadius: "5px",
                     cursor: "pointer",
                 },
-            }, "authorize") : null
+            }, "authorize") : 
+            React.createElement("button", {
+                onClick: () => {
+                    window.location.href = "http://localhost:8080";
+                },
+                style: {
+                    marginTop: "10px",
+                    padding: "5px",
+                    backgroundColor: "white",
+                    border: "1px solid black",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                },
+            }, "logout")
         );
     }
 }
