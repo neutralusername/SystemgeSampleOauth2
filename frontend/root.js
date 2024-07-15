@@ -68,7 +68,20 @@ export class root extends React.Component {
                     userSelect: "none",
                 },
             },
-            "Hello, ", this.state.username
+            this.state.username == "" ? "unauthorized" : ("Hello, " + this.state.username),
+            this.state.username == ""? React.createElement("button", {
+                onClick: () => {
+                    window.location.href = "http://localhost:8081";
+                },
+                style: {
+                    marginTop: "10px",
+                    padding: "5px",
+                    backgroundColor: "white",
+                    border: "1px solid black",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                },
+            }, "authorize") : null
         );
     }
 }

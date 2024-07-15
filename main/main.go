@@ -25,15 +25,15 @@ func main() {
 		Randomizer:              randomizer,
 		Oauth2State:             randomizer.GenerateRandomString(16, Utilities.ALPHA_NUMERIC),
 		SessionLifetimeMs:       15000,
-		Port:                    8080,
+		Port:                    8081,
 		AuthPath:                "/",
 		AuthCallbackPath:        "/callback",
-		SucessCallbackRedirect:  "http://localhost:8081",
+		SucessCallbackRedirect:  "http://localhost:8080",
 		FailureCallbackRedirect: "http://chatgpt.com",
 		OAuth2Config: &oauth2.Config{
 			ClientID:     "1261641608886222908",
 			ClientSecret: "xD",
-			RedirectURL:  "http://localhost:8080/callback",
+			RedirectURL:  "http://localhost:8081/callback",
 			Scopes:       []string{"identify"},
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  "https://discord.com/api/oauth2/authorize",
