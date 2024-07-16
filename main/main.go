@@ -40,7 +40,7 @@ func main() {
 				TokenURL: "https://discord.com/api/oauth2/token",
 			},
 		},
-		Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
+		Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
 		TokenHandler: func(oauth2Server *Oauth2.Server, token *oauth2.Token) (string, map[string]interface{}, error) {
 			client := oauth2Server.GetOauth2Config().Client(context.Background(), token)
 			resp, err := client.Get("https://discord.com/api/users/@me")
