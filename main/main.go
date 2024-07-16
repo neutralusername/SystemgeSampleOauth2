@@ -32,7 +32,7 @@ func main() {
 		FailureCallbackRedirect: "http://chatgpt.com",
 		OAuth2Config: &oauth2.Config{
 			ClientID:     "1261641608886222908",
-			ClientSecret: "xD",
+			ClientSecret: "RB9SMRZHm2-JLrkZyzbwj8s-d8S25VTI",
 			RedirectURL:  "http://localhost:8081/callback",
 			Scopes:       []string{"identify"},
 			Endpoint: oauth2.Endpoint{
