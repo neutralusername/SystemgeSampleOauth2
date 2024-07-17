@@ -64,7 +64,7 @@ func main() {
 			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
 		}, oauth2Server),
 		Node.New(Config.Node{
-			Name:   "nodeHTTP",
+			Name:   "nodeWebsocketHTTP",
 			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
 		}, appWebsocketHTTP.New(oauth2Server)),
 	))
