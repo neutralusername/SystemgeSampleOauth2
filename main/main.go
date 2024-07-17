@@ -1,13 +1,11 @@
 package main
 
 import (
-	"Systemge/Broker"
 	"Systemge/Config"
 	"Systemge/Error"
 	"Systemge/Module"
 	"Systemge/Node"
 	"Systemge/Oauth2"
-	"Systemge/Resolver"
 	"Systemge/Utilities"
 	"SystemgeSamplePingPong/appWebsocketHTTP"
 	"context"
@@ -20,7 +18,7 @@ const ERROR_LOG_FILE_PATH = "error.log"
 
 func main() {
 	randomizer := Utilities.NewRandomizer(Utilities.GetSystemTime())
-	oauth2Server, err := (Oauth2.Config{
+	oauth2Server, err := Oauth2.New(Config.Oauth2{
 		Name:                    "discordAuth",
 		Randomizer:              randomizer,
 		Oauth2State:             randomizer.GenerateRandomString(16, Utilities.ALPHA_NUMERIC),
@@ -32,7 +30,7 @@ func main() {
 		FailureCallbackRedirect: "http://chatgpt.com",
 		OAuth2Config: &oauth2.Config{
 			ClientID:     "1261641608886222908",
-			ClientSecret: "xD",
+			ClientSecret: "W0Qq0HGdR_EpnYP8j313xdokxpkMgrUG",
 			RedirectURL:  "http://localhost:8081/callback",
 			Scopes:       []string{"identify"},
 			Endpoint: oauth2.Endpoint{
@@ -41,8 +39,8 @@ func main() {
 			},
 		},
 		Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
-		TokenHandler: func(oauth2Server *Oauth2.Server, token *oauth2.Token) (string, map[string]interface{}, error) {
-			client := oauth2Server.GetOauth2Config().Client(context.Background(), token)
+		TokenHandler: func(oauth2Config *oauth2.Config, token *oauth2.Token) (string, map[string]interface{}, error) {
+			client := oauth2Config.Client(context.Background(), token)
 			resp, err := client.Get("https://discord.com/api/users/@me")
 			if err != nil {
 				return "", nil, Error.New("failed getting user", err)
@@ -58,18 +56,16 @@ func main() {
 			}
 			return discordAuthData["username"].(string), discordAuthData, nil
 		},
-	}).NewServer()
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	err = Resolver.New(Config.ParseResolverConfigFromFile("resolver.systemge")).Start()
-	if err != nil {
-		panic(err)
-	}
 	Module.StartCommandLineInterface(Module.NewMultiModule(
-		Broker.New(Config.ParseBrokerConfigFromFile("brokerHTTP.systemge")),
 		oauth2Server,
-		Node.New(Config.ParseNodeConfigFromFile("nodeHTTP.systemge"), appWebsocketHTTP.New(oauth2Server)),
+		Node.New(Config.Node{
+			Name:   "nodeOauth2",
+			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
+		}, appWebsocketHTTP.New(oauth2Server)),
 	))
 }
