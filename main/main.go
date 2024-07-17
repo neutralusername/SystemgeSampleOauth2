@@ -57,8 +57,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	Module.StartCommandLineInterface(Module.NewMultiModule(
+	Module.StartCommandLineInterface(Module.NewMultiModule(true,
 		Node.New(Config.Node{
 			Name:   "nodeOauth2",
 			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
