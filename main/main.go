@@ -18,7 +18,6 @@ const ERROR_LOG_FILE_PATH = "error.log"
 
 func main() {
 	oauth2Server, err := Oauth2.New(Config.Oauth2{
-		Name:                    "discordAuth",
 		Randomizer:              Utilities.NewRandomizer(Utilities.GetSystemTime()),
 		Oauth2State:             Utilities.RandomString(16, Utilities.ALPHA_NUMERIC),
 		SessionLifetimeMs:       15000,
@@ -37,7 +36,6 @@ func main() {
 				TokenURL: "https://discord.com/api/oauth2/token",
 			},
 		},
-		Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
 		TokenHandler: func(oauth2Config *oauth2.Config, token *oauth2.Token) (string, map[string]interface{}, error) {
 			client := oauth2Config.Client(context.Background(), token)
 			resp, err := client.Get("https://discord.com/api/users/@me")
@@ -61,9 +59,12 @@ func main() {
 	}
 
 	Module.StartCommandLineInterface(Module.NewMultiModule(
-		oauth2Server,
 		Node.New(Config.Node{
 			Name:   "nodeOauth2",
+			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
+		}, oauth2Server),
+		Node.New(Config.Node{
+			Name:   "nodeHTTP",
 			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
 		}, appWebsocketHTTP.New(oauth2Server)),
 	))
