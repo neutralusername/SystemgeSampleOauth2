@@ -3,10 +3,11 @@ package main
 import (
 	"Systemge/Config"
 	"Systemge/Error"
+	"Systemge/Helpers"
 	"Systemge/Node"
 	"Systemge/Oauth2"
-	"Systemge/TcpServer"
-	"Systemge/Utilities"
+	"Systemge/Tcp"
+	"Systemge/Tools"
 	"SystemgeSamplePingPong/appWebsocketHTTP"
 	"context"
 	"encoding/json"
@@ -17,17 +18,17 @@ import (
 const ERROR_LOG_FILE_PATH = "error.log"
 
 var gmailConfig = Config.Oauth2{
-	Randomizer:                 Utilities.NewRandomizer(Utilities.GetSystemTime()),
-	Oauth2State:                Utilities.RandomString(16, Utilities.ALPHA_NUMERIC),
+	RandomizerSeed:             Tools.GetSystemTime(),
+	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs:          15000,
-	Server:                     TcpServer.New(8081, "MyCertificate.crt", "MyKey.key"),
+	Server:                     Tcp.NewServer(8081, "MyCertificate.crt", "MyKey.key"),
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
 	CallbackSuccessRedirectUrl: "https://localhost:8080",
 	CallbackFailureRedirectUrl: "https://chatgpt.com",
 	OAuth2Config: &oauth2.Config{
 		ClientID:     "489235287049-jdbort0h24p9pfiupqpu8616dvgslq2t.apps.googleusercontent.com", // replace with your own
-		ClientSecret: Utilities.GetFileContent("gmailClientSecret.txt"),                          // replace with your own
+		ClientSecret: Helpers.GetFileContent("gmailClientSecret.txt"),                            // replace with your own
 		RedirectURL:  "https://localhost:8081/callback",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
@@ -58,17 +59,17 @@ var gmailConfig = Config.Oauth2{
 }
 
 var discordConfig = Config.Oauth2{
-	Randomizer:                 Utilities.NewRandomizer(Utilities.GetSystemTime()),
-	Oauth2State:                Utilities.RandomString(16, Utilities.ALPHA_NUMERIC),
+	RandomizerSeed:             Tools.GetSystemTime(),
+	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs:          15000,
-	Server:                     TcpServer.New(8081, "MyCertificate.crt", "MyKey.key"),
+	Server:                     Tcp.NewServer(8081, "MyCertificate.crt", "MyKey.key"),
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
 	CallbackSuccessRedirectUrl: "https://localhost:8080",
 	CallbackFailureRedirectUrl: "https://chatgpt.com",
 	OAuth2Config: &oauth2.Config{
-		ClientID:     "1261641608886222908",                               // replace with your own
-		ClientSecret: Utilities.GetFileContent("discordClientSecret.txt"), // replace with your own
+		ClientID:     "1261641608886222908",                             // replace with your own
+		ClientSecret: Helpers.GetFileContent("discordClientSecret.txt"), // replace with your own
 		RedirectURL:  "https://localhost:8081/callback",
 		Scopes:       []string{"identify"},
 		Endpoint: oauth2.Endpoint{
@@ -102,12 +103,24 @@ func main() {
 	}
 	Node.StartCommandLineInterface(true,
 		Node.New(Config.Node{
-			Name:   "nodeOauth2",
-			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
+			Name: "nodeOauth2",
+			Logger: Config.Logger{
+				InfoPath:    ERROR_LOG_FILE_PATH,
+				DebugPath:   ERROR_LOG_FILE_PATH,
+				ErrorPath:   ERROR_LOG_FILE_PATH,
+				WarningPath: ERROR_LOG_FILE_PATH,
+				QueueBuffer: 10000,
+			},
 		}, oauth2Server),
 		Node.New(Config.Node{
-			Name:   "nodeWebsocketHTTP",
-			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
+			Name: "nodeWebsocketHTTP",
+			Logger: Config.Logger{
+				InfoPath:    ERROR_LOG_FILE_PATH,
+				DebugPath:   ERROR_LOG_FILE_PATH,
+				ErrorPath:   ERROR_LOG_FILE_PATH,
+				WarningPath: ERROR_LOG_FILE_PATH,
+				QueueBuffer: 10000,
+			},
 		}, appWebsocketHTTP.New(oauth2Server)),
 	)
 }
