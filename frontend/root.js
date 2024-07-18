@@ -98,7 +98,7 @@ export class root extends React.Component {
             this.state.username == "" ? "unauthorized" : ("Hello, " + this.state.username),
             this.state.username == ""? React.createElement("button", {
                 onClick: () => {
-                    window.location.href = "http://localhost:8081";
+                    window.location.href = "https://localhost:8081";
                 },
                 style: {
                     marginTop: "10px",
