@@ -18,17 +18,17 @@ const ERROR_LOG_FILE_PATH = "error.log"
 
 func main() {
 	oauth2Server, err := Oauth2.New(Config.Oauth2{
-		Randomizer:              Utilities.NewRandomizer(Utilities.GetSystemTime()),
-		Oauth2State:             Utilities.RandomString(16, Utilities.ALPHA_NUMERIC),
-		SessionLifetimeMs:       15000,
-		Port:                    8081,
-		AuthPath:                "/",
-		AuthCallbackPath:        "/callback",
-		SucessCallbackRedirect:  "http://localhost:8080",
-		FailureCallbackRedirect: "http://chatgpt.com",
+		Randomizer:                 Utilities.NewRandomizer(Utilities.GetSystemTime()),
+		Oauth2State:                Utilities.RandomString(16, Utilities.ALPHA_NUMERIC),
+		SessionLifetimeMs:          15000,
+		Port:                       8081,
+		AuthPath:                   "/",
+		AuthCallbackPath:           "/callback",
+		SucessUrlCallbackRedirect:  "http://localhost:8080",
+		FailureUrlCallbackRedirect: "http://chatgpt.com",
 		OAuth2Config: &oauth2.Config{
 			ClientID:     "1261641608886222908",
-			ClientSecret: "W0Qq0HGdR_EpnYP8j313xdokxpkMgrUG",
+			ClientSecret: "xD",
 			RedirectURL:  "http://localhost:8081/callback",
 			Scopes:       []string{"identify"},
 			Endpoint: oauth2.Endpoint{
