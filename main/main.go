@@ -3,7 +3,6 @@ package main
 import (
 	"Systemge/Config"
 	"Systemge/Error"
-	"Systemge/Module"
 	"Systemge/Node"
 	"Systemge/Oauth2"
 	"Systemge/TcpServer"
@@ -101,7 +100,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	Module.StartCommandLineInterface(Module.NewMultiModule(true,
+	Node.StartCommandLineInterface(true,
 		Node.New(Config.Node{
 			Name:   "nodeOauth2",
 			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
@@ -110,5 +109,5 @@ func main() {
 			Name:   "nodeWebsocketHTTP",
 			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
 		}, appWebsocketHTTP.New(oauth2Server)),
-	))
+	)
 }
