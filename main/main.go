@@ -28,7 +28,7 @@ func main() {
 		FailureCallbackRedirect: "http://chatgpt.com",
 		OAuth2Config: &oauth2.Config{
 			ClientID:     "1261641608886222908",
-			ClientSecret: "xD",
+			ClientSecret: "W0Qq0HGdR_EpnYP8j313xdokxpkMgrUG",
 			RedirectURL:  "http://localhost:8081/callback",
 			Scopes:       []string{"identify"},
 			Endpoint: oauth2.Endpoint{
@@ -60,11 +60,11 @@ func main() {
 	Module.StartCommandLineInterface(Module.NewMultiModule(true,
 		Node.New(Config.Node{
 			Name:   "nodeOauth2",
-			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
+			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
 		}, oauth2Server),
 		Node.New(Config.Node{
 			Name:   "nodeWebsocketHTTP",
-			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, nil),
+			Logger: Utilities.NewLogger(ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH, ERROR_LOG_FILE_PATH),
 		}, appWebsocketHTTP.New(oauth2Server)),
 	))
 }
