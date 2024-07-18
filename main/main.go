@@ -6,7 +6,6 @@ import (
 	"Systemge/Helpers"
 	"Systemge/Node"
 	"Systemge/Oauth2"
-	"Systemge/Tcp"
 	"Systemge/Tools"
 	"SystemgeSamplePingPong/appWebsocketHTTP"
 	"context"
@@ -18,10 +17,14 @@ import (
 const ERROR_LOG_FILE_PATH = "error.log"
 
 var gmailConfig = Config.Oauth2{
-	RandomizerSeed:             Tools.GetSystemTime(),
-	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
-	SessionLifetimeMs:          15000,
-	Server:                     Tcp.NewServer(8081, "MyCertificate.crt", "MyKey.key"),
+	RandomizerSeed:    Tools.GetSystemTime(),
+	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
+	SessionLifetimeMs: 15000,
+	Server: Config.TcpServer{
+		Port:        8081,
+		TlsCertPath: "MyCertificate.crt",
+		TlsKeyPath:  "MyKey.key",
+	},
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
 	CallbackSuccessRedirectUrl: "https://localhost:8080",
@@ -59,10 +62,14 @@ var gmailConfig = Config.Oauth2{
 }
 
 var discordConfig = Config.Oauth2{
-	RandomizerSeed:             Tools.GetSystemTime(),
-	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
-	SessionLifetimeMs:          15000,
-	Server:                     Tcp.NewServer(8081, "MyCertificate.crt", "MyKey.key"),
+	RandomizerSeed:    Tools.GetSystemTime(),
+	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
+	SessionLifetimeMs: 15000,
+	Server: Config.TcpServer{
+		Port:        8081,
+		TlsCertPath: "MyCertificate.crt",
+		TlsKeyPath:  "MyKey.key",
+	},
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
 	CallbackSuccessRedirectUrl: "https://localhost:8080",
