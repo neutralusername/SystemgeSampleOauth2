@@ -16,11 +16,11 @@ import (
 
 const ERROR_LOG_FILE_PATH = "error.log"
 
-var gmailConfig = Config.Oauth2{
+var gmailConfig = &Config.Oauth2{
 	RandomizerSeed:    Tools.GetSystemTime(),
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
-	Server: Config.TcpServer{
+	Server: &Config.TcpServer{
 		Port:        8081,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
@@ -61,11 +61,11 @@ var gmailConfig = Config.Oauth2{
 	},
 }
 
-var discordConfig = Config.Oauth2{
+var discordConfig = &Config.Oauth2{
 	RandomizerSeed:    Tools.GetSystemTime(),
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
-	Server: Config.TcpServer{
+	Server: &Config.TcpServer{
 		Port:        8081,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
@@ -109,9 +109,9 @@ func main() {
 		panic(err)
 	}
 	Node.StartCommandLineInterface(true,
-		Node.New(Config.Node{
+		Node.New(&Config.Node{
 			Name: "nodeOauth2",
-			Logger: Config.Logger{
+			Logger: &Config.Logger{
 				InfoPath:    ERROR_LOG_FILE_PATH,
 				DebugPath:   ERROR_LOG_FILE_PATH,
 				ErrorPath:   ERROR_LOG_FILE_PATH,
@@ -119,9 +119,9 @@ func main() {
 				QueueBuffer: 10000,
 			},
 		}, oauth2Server),
-		Node.New(Config.Node{
+		Node.New(&Config.Node{
 			Name: "nodeWebsocketHTTP",
-			Logger: Config.Logger{
+			Logger: &Config.Logger{
 				InfoPath:    ERROR_LOG_FILE_PATH,
 				DebugPath:   ERROR_LOG_FILE_PATH,
 				ErrorPath:   ERROR_LOG_FILE_PATH,
