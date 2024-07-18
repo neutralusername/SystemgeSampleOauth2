@@ -15,12 +15,7 @@ func (app *AppWebsocketHTTP) GetWebsocketMessageHandlers() map[string]Node.Webso
 				websocketClient.Send(Message.NewAsync("authFailure", node.GetName(), "session not found").Serialize())
 				return nil
 			}
-			username, ok := session.Get("username")
-			if !ok {
-				websocketClient.Send(Message.NewAsync("authFailure", node.GetName(), "username not found").Serialize())
-				return nil
-			}
-			websocketClient.Send(Message.NewAsync("authSuccess", node.GetName(), username.(string)).Serialize())
+			websocketClient.Send(Message.NewAsync("authSuccess", node.GetName(), session.GetIdentity()).Serialize())
 			return nil
 		},
 		"logoutAttempt": func(node *Node.Node, websocketClient *Node.WebsocketClient, message *Message.Message) error {
