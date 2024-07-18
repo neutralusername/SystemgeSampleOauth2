@@ -28,7 +28,7 @@ var gmailConfig = Config.Oauth2{
 	CallbackFailureRedirectUrl: "https://chatgpt.com",
 	OAuth2Config: &oauth2.Config{
 		ClientID:     "489235287049-jdbort0h24p9pfiupqpu8616dvgslq2t.apps.googleusercontent.com",
-		ClientSecret: "xD",
+		ClientSecret: Utilities.GetFileContent("gmailClientSecret.txt"),
 		RedirectURL:  "https://localhost:8081/callback",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
@@ -69,7 +69,7 @@ var discordConfig = Config.Oauth2{
 	CallbackFailureRedirectUrl: "https://chatgpt.com",
 	OAuth2Config: &oauth2.Config{
 		ClientID:     "1261641608886222908",
-		ClientSecret: "xD",
+		ClientSecret: Utilities.GetFileContent("discordClientSecret.txt"),
 		RedirectURL:  "https://localhost:8081/callback",
 		Scopes:       []string{"identify"},
 		Endpoint: oauth2.Endpoint{
