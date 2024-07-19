@@ -17,7 +17,6 @@ import (
 const LOGGER_PATH = "logs.log"
 
 var gmailConfig = &Config.Oauth2{
-	RandomizerSeed:    Tools.GetSystemTime(),
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
 	Server: &Config.TcpServer{
@@ -62,7 +61,6 @@ var gmailConfig = &Config.Oauth2{
 }
 
 var discordConfig = &Config.Oauth2{
-	RandomizerSeed:    Tools.GetSystemTime(),
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
 	Server: &Config.TcpServer{
