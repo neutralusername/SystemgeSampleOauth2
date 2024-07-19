@@ -108,7 +108,8 @@ func main() {
 	}
 	Node.StartCommandLineInterface(true,
 		Node.New(&Config.Node{
-			Name: "nodeOauth2",
+			Name:           "nodeOauth2",
+			RandomizerSeed: Tools.GetSystemTime(),
 			InfoLogger: &Config.Logger{
 				Path:        LOGGER_PATH,
 				QueueBuffer: 10000,
@@ -131,7 +132,8 @@ func main() {
 			},
 		}, oauth2Server),
 		Node.New(&Config.Node{
-			Name: "nodeWebsocketHTTP",
+			Name:           "nodeWebsocketHTTP",
+			RandomizerSeed: Tools.GetSystemTime(),
 			InfoLogger: &Config.Logger{
 				Path:        LOGGER_PATH,
 				QueueBuffer: 10000,
