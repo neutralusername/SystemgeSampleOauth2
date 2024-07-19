@@ -106,7 +106,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	Node.StartCommandLineInterface(true,
+	Node.StartCommandLineInterface(
 		Node.New(&Config.Node{
 			Name:           "nodeOauth2",
 			RandomizerSeed: Tools.GetSystemTime(),
