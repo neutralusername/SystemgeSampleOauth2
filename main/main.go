@@ -14,7 +14,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const ERROR_LOG_FILE_PATH = "error.log"
+const LOGGER_PATH = "logs.log"
 
 var gmailConfig = &Config.Oauth2{
 	RandomizerSeed:    Tools.GetSystemTime(),
@@ -111,22 +111,48 @@ func main() {
 	Node.StartCommandLineInterface(true,
 		Node.New(&Config.Node{
 			Name: "nodeOauth2",
-			Logger: &Config.Logger{
-				InfoPath:    ERROR_LOG_FILE_PATH,
-				DebugPath:   ERROR_LOG_FILE_PATH,
-				ErrorPath:   ERROR_LOG_FILE_PATH,
-				WarningPath: ERROR_LOG_FILE_PATH,
+			InfoLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
 				QueueBuffer: 10000,
+				Prefix:      "[Info \"nodeOauth2\"] ",
+			},
+			WarningLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
+				QueueBuffer: 10000,
+				Prefix:      "[Warning \"nodeOauth2\"] ",
+			},
+			ErrorLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
+				QueueBuffer: 10000,
+				Prefix:      "[Error \"nodeOauth2\"] ",
+			},
+			DebugLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
+				QueueBuffer: 10000,
+				Prefix:      "[Debug \"nodeOauth2\"] ",
 			},
 		}, oauth2Server),
 		Node.New(&Config.Node{
 			Name: "nodeWebsocketHTTP",
-			Logger: &Config.Logger{
-				InfoPath:    ERROR_LOG_FILE_PATH,
-				DebugPath:   ERROR_LOG_FILE_PATH,
-				ErrorPath:   ERROR_LOG_FILE_PATH,
-				WarningPath: ERROR_LOG_FILE_PATH,
+			InfoLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
 				QueueBuffer: 10000,
+				Prefix:      "[Info \"nodeWebsocketHTTP\"] ",
+			},
+			WarningLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
+				QueueBuffer: 10000,
+				Prefix:      "[Warning \"nodeWebsocketHTTP\"] ",
+			},
+			ErrorLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
+				QueueBuffer: 10000,
+				Prefix:      "[Error \"nodeWebsocketHTTP\"] ",
+			},
+			DebugLogger: &Config.Logger{
+				Path:        LOGGER_PATH,
+				QueueBuffer: 10000,
+				Prefix:      "[Debug \"nodeWebsocketHTTP\"] ",
 			},
 		}, appWebsocketHTTP.New(oauth2Server)),
 	)
