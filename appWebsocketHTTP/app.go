@@ -5,10 +5,10 @@ import (
 )
 
 type AppWebsocketHTTP struct {
-	oauth2Server *Oauth2.Server
+	oauth2Server *Oauth2.App
 }
 
-func New(oauth2Server *Oauth2.Server) *AppWebsocketHTTP {
+func New(oauth2Server *Oauth2.App) *AppWebsocketHTTP {
 	return &AppWebsocketHTTP{
 		oauth2Server: oauth2Server,
 	}
