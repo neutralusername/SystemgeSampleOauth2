@@ -188,6 +188,5 @@ func main() {
 				Prefix:      "[Debug \"nodeWebsocketHTTP\"] ",
 			},
 		}, appWebsocketHTTP.New(oauth2Server)),
-	)).Start()
-	<-make(chan struct{})
+	)).StartBlocking()
 }
