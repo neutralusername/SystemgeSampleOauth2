@@ -20,10 +20,14 @@ const LOGGER_PATH = "logs.log"
 var gmailConfig = &Config.Oauth2{
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
-	Server: &Config.TcpServer{
-		Port:        8081,
-		TlsCertPath: "MyCertificate.crt",
-		TlsKeyPath:  "MyKey.key",
+	Http: &Config.Http{
+		Server: &Config.TcpServer{
+			Port:        8081,
+			TlsCertPath: "MyCertificate.crt",
+			TlsKeyPath:  "MyKey.key",
+		},
+		Blacklist: []string{},
+		Whitelist: []string{},
 	},
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
@@ -64,10 +68,14 @@ var gmailConfig = &Config.Oauth2{
 var discordConfig = &Config.Oauth2{
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
-	Server: &Config.TcpServer{
-		Port:        8081,
-		TlsCertPath: "MyCertificate.crt",
-		TlsKeyPath:  "MyKey.key",
+	Http: &Config.Http{
+		Server: &Config.TcpServer{
+			Port:        8081,
+			TlsCertPath: "MyCertificate.crt",
+			TlsKeyPath:  "MyKey.key",
+		},
+		Blacklist: []string{},
+		Whitelist: []string{},
 	},
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
@@ -188,5 +196,4 @@ func main() {
 		}, appWebsocketHTTP.New(oauth2Server)),
 	)).Start()
 	<-make(chan struct{})
-
 }
