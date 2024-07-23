@@ -188,5 +188,5 @@ func main() {
 				Prefix:      "[Debug \"nodeWebsocketHTTP\"] ",
 			},
 		}, appWebsocketHTTP.New(oauth2Server)),
-	)).StartBlocking(nil)
+	)).StartBlocking()
 }
