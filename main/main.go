@@ -138,7 +138,11 @@ func main() {
 		Server: &Config.TcpServer{
 			Port: 8082,
 		},
-		StatusUpdateIntervalMs: 1000,
+		NodeStatusIntervalMs:           1000,
+		NodeSystemgeCountersIntervalMs: 1000,
+		NodeWebsocketCounterIntervalMs: 1000,
+		HeapUpdateIntervalMs:           1000,
+		AutoStart:                      true,
 	},
 		Node.New(&Config.Node{
 			Name:           "nodeOauth2",
