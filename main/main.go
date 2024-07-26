@@ -107,6 +107,7 @@ var discordConfig = &Config.Oauth2{
 }
 
 func main() {
+	loggerQueue := Tools.NewLoggerQueue(LOGGER_PATH, 10000)
 	oauth2Server, err := Oauth2.New(discordConfig)
 	if err != nil {
 		panic(err)
@@ -114,26 +115,6 @@ func main() {
 	Node.New(&Config.Node{
 		Name:           "dashboard",
 		RandomizerSeed: Tools.GetSystemTime(),
-		ErrorLogger: &Config.Logger{
-			Path:        LOGGER_PATH,
-			QueueBuffer: 10000,
-			Prefix:      "[Error \"dashboard\"] ",
-		},
-		WarningLogger: &Config.Logger{
-			Path:        LOGGER_PATH,
-			QueueBuffer: 10000,
-			Prefix:      "[Warning \"dashboard\"] ",
-		},
-		InfoLogger: &Config.Logger{
-			Path:        LOGGER_PATH,
-			QueueBuffer: 10000,
-			Prefix:      "[Info \"dashboard\"] ",
-		},
-		DebugLogger: &Config.Logger{
-			Path:        LOGGER_PATH,
-			QueueBuffer: 10000,
-			Prefix:      "[Debug \"dashboard\"] ",
-		},
 	}, Dashboard.New(&Config.Dashboard{
 		Server: &Config.TcpServer{
 			Port: 8082,
@@ -149,50 +130,16 @@ func main() {
 		Node.New(&Config.Node{
 			Name:           "nodeOauth2",
 			RandomizerSeed: Tools.GetSystemTime(),
-			InfoLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Info \"nodeOauth2\"] ",
-			},
-			WarningLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Warning \"nodeOauth2\"] ",
-			},
-			ErrorLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Error \"nodeOauth2\"] ",
-			},
-			DebugLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Debug \"nodeOauth2\"] ",
-			},
+			InfoLogger:     Tools.NewLogger("[Info \"nodeOauth2\"] ", loggerQueue),
+			WarningLogger:  Tools.NewLogger("[Warning \"nodeOauth2\"] ", loggerQueue),
+			ErrorLogger:    Tools.NewLogger("[Error \"nodeOauth2\"] ", loggerQueue),
 		}, oauth2Server),
 		Node.New(&Config.Node{
 			Name:           "nodeWebsocketHTTP",
 			RandomizerSeed: Tools.GetSystemTime(),
-			InfoLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Info \"nodeWebsocketHTTP\"] ",
-			},
-			WarningLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Warning \"nodeWebsocketHTTP\"] ",
-			},
-			ErrorLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Error \"nodeWebsocketHTTP\"] ",
-			},
-			DebugLogger: &Config.Logger{
-				Path:        LOGGER_PATH,
-				QueueBuffer: 10000,
-				Prefix:      "[Debug \"nodeWebsocketHTTP\"] ",
-			},
+			InfoLogger:     Tools.NewLogger("[Info \"nodeWebsocketHTTP\"] ", loggerQueue),
+			WarningLogger:  Tools.NewLogger("[Warning \"nodeWebsocketHTTP\"] ", loggerQueue),
+			ErrorLogger:    Tools.NewLogger("[Error \"nodeWebsocketHTTP\"] ", loggerQueue),
 		}, appWebsocketHTTP.New(oauth2Server)),
 	)).StartBlocking()
 }
