@@ -1,7 +1,7 @@
 package appWebsocketHTTP
 
 import (
-	"Systemge/Oauth2"
+	"github.com/neutralusername/Systemge/Oauth2"
 )
 
 type AppWebsocketHTTP struct {

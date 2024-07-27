@@ -1,16 +1,17 @@
 package main
 
 import (
-	"Systemge/Config"
-	"Systemge/Dashboard"
-	"Systemge/Error"
-	"Systemge/Helpers"
-	"Systemge/Node"
-	"Systemge/Oauth2"
-	"Systemge/Tools"
 	"SystemgeSamplePingPong/appWebsocketHTTP"
 	"context"
 	"encoding/json"
+
+	"github.com/neutralusername/Systemge/Config"
+	"github.com/neutralusername/Systemge/Dashboard"
+	"github.com/neutralusername/Systemge/Error"
+	"github.com/neutralusername/Systemge/Helpers"
+	"github.com/neutralusername/Systemge/Node"
+	"github.com/neutralusername/Systemge/Oauth2"
+	"github.com/neutralusername/Systemge/Tools"
 
 	"golang.org/x/oauth2"
 )
