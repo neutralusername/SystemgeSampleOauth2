@@ -3,7 +3,7 @@ export class root extends React.Component {
         super(props);
         this.state = {
             username: "",
-            WS_CONNECTION: new WebSocket("ws://localhost:8443/ws"),
+            WS_CONNECTION: new WebSocket("wss://localhost:8443/ws"),
             constructMessage: (topic, payload) => {
                 return JSON.stringify({
                     topic: topic,

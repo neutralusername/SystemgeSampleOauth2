@@ -14,9 +14,11 @@ func (app *AppWebsocketHTTP) GetWebsocketComponentConfig() *Config.Websocket {
 	return &Config.Websocket{
 		Pattern: "/ws",
 		Server: &Config.TcpServer{
-			Port:      8443,
-			Blacklist: []string{},
-			Whitelist: []string{},
+			Port:        8443,
+			TlsCertPath: "MyCertificate.crt",
+			TlsKeyPath:  "MyKey.key",
+			Blacklist:   []string{},
+			Whitelist:   []string{},
 		},
 		HandleClientMessagesSequentially: false,
 		ClientMessageCooldownMs:          0,
