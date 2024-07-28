@@ -129,7 +129,7 @@ func main() {
 		NodeSpawnerCounterIntervalMs:   1000,
 		NodeHTTPCounterIntervalMs:      1000,
 		AutoStart:                      true,
-		EnableDashboardCounters:        true,
+		AddDashboardToDashboard:        true,
 	},
 		Node.New(&Config.Node{
 			Name:           "nodeOauth2",
