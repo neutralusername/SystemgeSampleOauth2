@@ -128,6 +128,7 @@ func main() {
 		HeapUpdateIntervalMs:           1000,
 		NodeSpawnerCounterIntervalMs:   1000,
 		NodeHTTPCounterIntervalMs:      1000,
+		GoroutineUpdateIntervalMs:      1000,
 		AutoStart:                      true,
 		AddDashboardToDashboard:        true,
 	},
