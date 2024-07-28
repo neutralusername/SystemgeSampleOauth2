@@ -108,7 +108,7 @@ var discordConfig = &Config.Oauth2{
 }
 
 func main() {
-	loggerQueue := Tools.NewLoggerQueue(LOGGER_PATH, 10000)
+	Tools.NewLoggerQueue(LOGGER_PATH, 10000)
 	oauth2Server, err := Oauth2.New(discordConfig)
 	if err != nil {
 		panic(err)
@@ -133,18 +133,18 @@ func main() {
 		AddDashboardToDashboard:        true,
 	},
 		Node.New(&Config.Node{
-			Name:           "nodeOauth2",
-			RandomizerSeed: Tools.GetSystemTime(),
-			InfoLogger:     Tools.NewLogger("[Info \"nodeOauth2\"] ", loggerQueue),
-			WarningLogger:  Tools.NewLogger("[Warning \"nodeOauth2\"] ", loggerQueue),
-			ErrorLogger:    Tools.NewLogger("[Error \"nodeOauth2\"] ", loggerQueue),
+			Name:              "nodeOauth2",
+			RandomizerSeed:    Tools.GetSystemTime(),
+			InfoLoggerPath:    LOGGER_PATH,
+			WarningLoggerPath: LOGGER_PATH,
+			ErrorLoggerPath:   LOGGER_PATH,
 		}, oauth2Server),
 		Node.New(&Config.Node{
-			Name:           "nodeWebsocketHTTP",
-			RandomizerSeed: Tools.GetSystemTime(),
-			InfoLogger:     Tools.NewLogger("[Info \"nodeWebsocketHTTP\"] ", loggerQueue),
-			WarningLogger:  Tools.NewLogger("[Warning \"nodeWebsocketHTTP\"] ", loggerQueue),
-			ErrorLogger:    Tools.NewLogger("[Error \"nodeWebsocketHTTP\"] ", loggerQueue),
+			Name:              "nodeWebsocketHTTP",
+			RandomizerSeed:    Tools.GetSystemTime(),
+			InfoLoggerPath:    LOGGER_PATH,
+			WarningLoggerPath: LOGGER_PATH,
+			ErrorLoggerPath:   LOGGER_PATH,
 		}, appWebsocketHTTP.New(oauth2Server)),
 	)).StartBlocking()
 }
