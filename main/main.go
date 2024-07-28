@@ -126,7 +126,10 @@ func main() {
 		NodeBrokerCounterIntervalMs:    1000,
 		NodeResolverCounterIntervalMs:  1000,
 		HeapUpdateIntervalMs:           1000,
+		NodeSpawnerCounterIntervalMs:   1000,
+		NodeHTTPCounterIntervalMs:      1000,
 		AutoStart:                      true,
+		EnableDashboardCounters:        true,
 	},
 		Node.New(&Config.Node{
 			Name:           "nodeOauth2",
