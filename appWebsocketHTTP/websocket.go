@@ -1,57 +1,29 @@
 package appWebsocketHTTP
 
 import (
-	"net/http"
-
-	"github.com/neutralusername/Systemge/Config"
 	"github.com/neutralusername/Systemge/Message"
 	"github.com/neutralusername/Systemge/Node"
-
-	"github.com/gorilla/websocket"
 )
-
-func (app *AppWebsocketHTTP) GetWebsocketComponentConfig() *Config.Websocket {
-	return &Config.Websocket{
-		Pattern: "/ws",
-		Server: &Config.TcpServer{
-			Port:        8443,
-			TlsCertPath: "MyCertificate.crt",
-			TlsKeyPath:  "MyKey.key",
-			Blacklist:   []string{},
-			Whitelist:   []string{},
-		},
-		HandleClientMessagesSequentially: false,
-		ClientMessageCooldownMs:          0,
-		ClientWatchdogTimeoutMs:          20000,
-		Upgrader: &websocket.Upgrader{
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-			CheckOrigin: func(r *http.Request) bool {
-				return true
-			},
-		},
-	}
-}
 
 func (app *AppWebsocketHTTP) GetWebsocketMessageHandlers() map[string]Node.WebsocketMessageHandler {
 	return map[string]Node.WebsocketMessageHandler{
 		"authAttempt": func(node *Node.Node, websocketClient *Node.WebsocketClient, message *Message.Message) error {
 			session := app.oauth2Server.GetSession(message.GetPayload())
 			if session == nil {
-				websocketClient.Send(Message.NewAsync("authFailure", node.GetName(), "session not found").Serialize())
+				websocketClient.Send(Message.NewAsync("authFailure", "session not found").Serialize())
 				return nil
 			}
-			websocketClient.Send(Message.NewAsync("authSuccess", node.GetName(), session.GetIdentity()).Serialize())
+			websocketClient.Send(Message.NewAsync("authSuccess", session.GetIdentity()).Serialize())
 			return nil
 		},
 		"logoutAttempt": func(node *Node.Node, websocketClient *Node.WebsocketClient, message *Message.Message) error {
 			session := app.oauth2Server.GetSession(message.GetPayload())
 			if session == nil {
-				websocketClient.Send(Message.NewAsync("logoutFailure", node.GetName(), "session not found").Serialize())
+				websocketClient.Send(Message.NewAsync("logoutFailure", "session not found").Serialize())
 				return nil
 			}
 			app.oauth2Server.Expire(session)
-			websocketClient.Send(Message.NewAsync("logoutSuccess", node.GetName(), "").Serialize())
+			websocketClient.Send(Message.NewAsync("logoutSuccess", "").Serialize())
 			return nil
 		},
 	}

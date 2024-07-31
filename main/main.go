@@ -1,10 +1,12 @@
 package main
 
 import (
-	"SystemgeSamplePingPong/appWebsocketHTTP"
+	"SystemgeSampleOauth2/appWebsocketHTTP"
 	"context"
 	"encoding/json"
+	"net/http"
 
+	"github.com/gorilla/websocket"
 	"github.com/neutralusername/Systemge/Config"
 	"github.com/neutralusername/Systemge/Dashboard"
 	"github.com/neutralusername/Systemge/Error"
@@ -19,9 +21,16 @@ import (
 const LOGGER_PATH = "logs.log"
 
 var gmailConfig = &Config.Oauth2{
+	NodeConfig: &Config.Node{
+		Name:              "nodeOauth2",
+		RandomizerSeed:    Tools.GetSystemTime(),
+		InfoLoggerPath:    LOGGER_PATH,
+		WarningLoggerPath: LOGGER_PATH,
+		ErrorLoggerPath:   LOGGER_PATH,
+	},
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
-	Server: &Config.TcpServer{
+	ServerConfig: &Config.TcpServer{
 		Port:        8081,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
@@ -65,9 +74,16 @@ var gmailConfig = &Config.Oauth2{
 }
 
 var discordConfig = &Config.Oauth2{
+	NodeConfig: &Config.Node{
+		Name:              "nodeOauth2",
+		RandomizerSeed:    Tools.GetSystemTime(),
+		InfoLoggerPath:    LOGGER_PATH,
+		WarningLoggerPath: LOGGER_PATH,
+		ErrorLoggerPath:   LOGGER_PATH,
+	},
 	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs: 15000,
-	Server: &Config.TcpServer{
+	ServerConfig: &Config.TcpServer{
 		Port:        8081,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
@@ -109,22 +125,21 @@ var discordConfig = &Config.Oauth2{
 
 func main() {
 	Tools.NewLoggerQueue(LOGGER_PATH, 10000)
-	oauth2Server, err := Oauth2.New(discordConfig)
+	oauth2Node, err := Oauth2.New(discordConfig)
 	if err != nil {
 		panic(err)
 	}
-	Node.New(&Config.Node{
-		Name:           "dashboard",
-		RandomizerSeed: Tools.GetSystemTime(),
-	}, Dashboard.New(&Config.Dashboard{
-		Server: &Config.TcpServer{
+	Dashboard.New(&Config.Dashboard{
+		NodeConfig: &Config.Node{
+			Name:           "dashboard",
+			RandomizerSeed: Tools.GetSystemTime(),
+		},
+		ServerConfig: &Config.TcpServer{
 			Port: 8082,
 		},
 		NodeStatusIntervalMs:           1000,
 		NodeSystemgeCounterIntervalMs:  1000,
 		NodeWebsocketCounterIntervalMs: 1000,
-		NodeBrokerCounterIntervalMs:    1000,
-		NodeResolverCounterIntervalMs:  1000,
 		HeapUpdateIntervalMs:           1000,
 		NodeSpawnerCounterIntervalMs:   1000,
 		NodeHTTPCounterIntervalMs:      1000,
@@ -132,19 +147,42 @@ func main() {
 		AutoStart:                      true,
 		AddDashboardToDashboard:        true,
 	},
-		Node.New(&Config.Node{
-			Name:              "nodeOauth2",
-			RandomizerSeed:    Tools.GetSystemTime(),
-			InfoLoggerPath:    LOGGER_PATH,
-			WarningLoggerPath: LOGGER_PATH,
-			ErrorLoggerPath:   LOGGER_PATH,
-		}, oauth2Server),
-		Node.New(&Config.Node{
-			Name:              "nodeWebsocketHTTP",
-			RandomizerSeed:    Tools.GetSystemTime(),
-			InfoLoggerPath:    LOGGER_PATH,
-			WarningLoggerPath: LOGGER_PATH,
-			ErrorLoggerPath:   LOGGER_PATH,
-		}, appWebsocketHTTP.New(oauth2Server)),
-	)).StartBlocking()
+		oauth2Node,
+		Node.New(&Config.NewNode{
+			HttpConfig: &Config.HTTP{
+				ServerConfig: &Config.TcpServer{
+					Port:        8080,
+					TlsCertPath: "MyCertificate.crt",
+					TlsKeyPath:  "MyKey.key",
+				},
+			},
+			WebsocketConfig: &Config.Websocket{
+				Pattern: "/ws",
+				ServerConfig: &Config.TcpServer{
+					Port:        8443,
+					TlsCertPath: "MyCertificate.crt",
+					TlsKeyPath:  "MyKey.key",
+					Blacklist:   []string{},
+					Whitelist:   []string{},
+				},
+				HandleClientMessagesSequentially: false,
+				ClientMessageCooldownMs:          0,
+				ClientWatchdogTimeoutMs:          20000,
+				Upgrader: &websocket.Upgrader{
+					ReadBufferSize:  1024,
+					WriteBufferSize: 1024,
+					CheckOrigin: func(r *http.Request) bool {
+						return true
+					},
+				},
+			},
+			NodeConfig: &Config.Node{
+				Name:              "nodeWebsocketHTTP",
+				RandomizerSeed:    Tools.GetSystemTime(),
+				InfoLoggerPath:    LOGGER_PATH,
+				WarningLoggerPath: LOGGER_PATH,
+				ErrorLoggerPath:   LOGGER_PATH,
+			},
+		}, appWebsocketHTTP.New(oauth2Node.GetApplication().(*Oauth2.App))),
+	).StartBlocking()
 }
