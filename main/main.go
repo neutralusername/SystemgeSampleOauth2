@@ -28,15 +28,15 @@ var gmailConfig = &Config.Oauth2{
 		WarningLoggerPath: LOGGER_PATH,
 		ErrorLoggerPath:   LOGGER_PATH,
 	},
-	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
-	SessionLifetimeMs: 15000,
 	ServerConfig: &Config.TcpServer{
-		Port:        8081,
+		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
 		Blacklist:   []string{},
 		Whitelist:   []string{},
 	},
+	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
+	SessionLifetimeMs:          15000,
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
 	CallbackSuccessRedirectUrl: "https://localhost:8080",
@@ -44,7 +44,7 @@ var gmailConfig = &Config.Oauth2{
 	OAuth2Config: &oauth2.Config{
 		ClientID:     "489235287049-jdbort0h24p9pfiupqpu8616dvgslq2t.apps.googleusercontent.com", // replace with your own
 		ClientSecret: Helpers.GetFileContent("gmailClientSecret.txt"),                            // replace with your own
-		RedirectURL:  "https://localhost:8081/callback",
+		RedirectURL:  "https://localhost:8082/callback",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile",
@@ -81,15 +81,15 @@ var discordConfig = &Config.Oauth2{
 		WarningLoggerPath: LOGGER_PATH,
 		ErrorLoggerPath:   LOGGER_PATH,
 	},
-	Oauth2State:       Tools.RandomString(16, Tools.ALPHA_NUMERIC),
-	SessionLifetimeMs: 15000,
 	ServerConfig: &Config.TcpServer{
-		Port:        8081,
+		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
 		Blacklist:   []string{},
 		Whitelist:   []string{},
 	},
+	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
+	SessionLifetimeMs:          15000,
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
 	CallbackSuccessRedirectUrl: "https://localhost:8080",
@@ -97,7 +97,7 @@ var discordConfig = &Config.Oauth2{
 	OAuth2Config: &oauth2.Config{
 		ClientID:     "1261641608886222908",                             // replace with your own
 		ClientSecret: Helpers.GetFileContent("discordClientSecret.txt"), // replace with your own
-		RedirectURL:  "https://localhost:8081/callback",
+		RedirectURL:  "https://localhost:8082/callback",
 		Scopes:       []string{"identify"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
@@ -135,7 +135,7 @@ func main() {
 			RandomizerSeed: Tools.GetSystemTime(),
 		},
 		ServerConfig: &Config.TcpServer{
-			Port: 8082,
+			Port: 8081,
 		},
 		NodeStatusIntervalMs:           1000,
 		NodeSystemgeCounterIntervalMs:  1000,
