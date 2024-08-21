@@ -1,19 +1,20 @@
 package main
 
 import (
-	"SystemgeSampleOauth2/appWebsocketHTTP"
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/neutralusername/Systemge/Config"
-	"github.com/neutralusername/Systemge/Dashboard"
 	"github.com/neutralusername/Systemge/Error"
+	"github.com/neutralusername/Systemge/HTTPServer"
 	"github.com/neutralusername/Systemge/Helpers"
-	"github.com/neutralusername/Systemge/Node"
-	"github.com/neutralusername/Systemge/Oauth2"
+	"github.com/neutralusername/Systemge/Message"
+	"github.com/neutralusername/Systemge/Oauth2Server"
 	"github.com/neutralusername/Systemge/Tools"
+	"github.com/neutralusername/Systemge/WebsocketServer"
 
 	"golang.org/x/oauth2"
 )
@@ -21,21 +22,14 @@ import (
 const LOGGER_PATH = "logs.log"
 
 var gmailConfig = &Config.Oauth2{
-	NodeConfig: &Config.Node{
-		Name:              "nodeOauth2",
-		RandomizerSeed:    Tools.GetSystemTime(),
-		InfoLoggerPath:    LOGGER_PATH,
-		WarningLoggerPath: LOGGER_PATH,
-		ErrorLoggerPath:   LOGGER_PATH,
-	},
-	ServerConfig: &Config.TcpServer{
+	TcpListenerConfig: &Config.TcpListener{
 		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
 		Blacklist:   []string{},
 		Whitelist:   []string{},
 	},
-	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
+	Oauth2State:                Tools.GenerateRandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs:          15000,
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
@@ -74,21 +68,14 @@ var gmailConfig = &Config.Oauth2{
 }
 
 var discordConfig = &Config.Oauth2{
-	NodeConfig: &Config.Node{
-		Name:              "nodeOauth2",
-		RandomizerSeed:    Tools.GetSystemTime(),
-		InfoLoggerPath:    LOGGER_PATH,
-		WarningLoggerPath: LOGGER_PATH,
-		ErrorLoggerPath:   LOGGER_PATH,
-	},
-	ServerConfig: &Config.TcpServer{
+	TcpListenerConfig: &Config.TcpListener{
 		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
 		Blacklist:   []string{},
 		Whitelist:   []string{},
 	},
-	Oauth2State:                Tools.RandomString(16, Tools.ALPHA_NUMERIC),
+	Oauth2State:                Tools.GenerateRandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs:          15000,
 	AuthPath:                   "/",
 	AuthCallbackPath:           "/callback",
@@ -125,79 +112,75 @@ var discordConfig = &Config.Oauth2{
 
 func main() {
 	Tools.NewLoggerQueue(LOGGER_PATH, 10000)
-	oauth2Node, err := Oauth2.New(discordConfig)
-	if err != nil {
-		panic(err)
+	oauth2Server := Oauth2Server.New(discordConfig)
+	oauth2Server.Start()
+	websocketServer := WebsocketServer.New(&Config.WebsocketServer{
+		InfoLoggerPath:    LOGGER_PATH,
+		WarningLoggerPath: LOGGER_PATH,
+		ErrorLoggerPath:   LOGGER_PATH,
+		MailerConfig:      nil,
+		Pattern:           "/ws",
+		TcpListenerConfig: &Config.TcpListener{
+			Port:        8443,
+			TlsCertPath: "MyCertificate.crt",
+			TlsKeyPath:  "MyKey.key",
+		},
+		ClientRateLimiterBytes:           nil,
+		ClientRateLimiterMessages:        nil,
+		IncomingMessageByteLimit:         0,
+		HandleClientMessagesSequentially: false,
+		ClientWatchdogTimeoutMs:          60000,
+		Upgrader: &websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
+	}, getWebsocketMessageHandlers(oauth2Server), nil, nil)
+	go func() {
+		err := websocketServer.Start()
+		if err != nil {
+			panic(err)
+		}
+	}()
+	httpServer := HTTPServer.New(&Config.HTTPServer{
+		TcpListenerConfig: &Config.TcpListener{
+			Port:        8080,
+			TlsCertPath: "MyCertificate.crt",
+			TlsKeyPath:  "MyKey.key",
+		},
+	}, GgtHTTPMessageHandlers())
+	httpServer.Start()
+	time.Sleep(1000 * time.Hour)
+}
+
+func GgtHTTPMessageHandlers() map[string]http.HandlerFunc {
+	return map[string]http.HandlerFunc{
+		"/": HTTPServer.SendDirectory("../frontend"),
 	}
-	Dashboard.New(&Config.Dashboard{
-		NodeConfig: &Config.Node{
-			Name:           "dashboard",
-			RandomizerSeed: Tools.GetSystemTime(),
+}
+
+func getWebsocketMessageHandlers(oauth2Server *Oauth2Server.Server) WebsocketServer.MessageHandlers {
+	return map[string]WebsocketServer.MessageHandler{
+		"authAttempt": func(websocketClient *WebsocketServer.WebsocketClient, message *Message.Message) error {
+			session := oauth2Server.GetSession(message.GetPayload())
+			if session == nil {
+				websocketClient.Send(Message.NewAsync("authFailure", "session not found").Serialize())
+				return nil
+			}
+			websocketClient.Send(Message.NewAsync("authSuccess", session.GetIdentity()).Serialize())
+			return nil
 		},
-		ServerConfig: &Config.TcpServer{
-			Port: 8081,
+		"logoutAttempt": func(websocketClient *WebsocketServer.WebsocketClient, message *Message.Message) error {
+			session := oauth2Server.GetSession(message.GetPayload())
+			if session == nil {
+				websocketClient.Send(Message.NewAsync("logoutFailure", "session not found").Serialize())
+				return nil
+			}
+			oauth2Server.Expire(session)
+			websocketClient.Send(Message.NewAsync("logoutSuccess", "").Serialize())
+			return nil
 		},
-		NodeStatusIntervalMs: 1000,
-
-		NodeSystemgeClientCounterIntervalMs:             1000,
-		NodeSystemgeClientRateLimitCounterIntervalMs:    1000,
-		NodeSystemgeClientConnectionCounterIntervalMs:   1000,
-		NodeSystemgeClientAsyncMessageCounterIntervalMs: 1000,
-		NodeSystemgeClientSyncResponseCounterIntervalMs: 1000,
-		NodeSystemgeClientSyncRequestCounterIntervalMs:  1000,
-		NodeSystemgeClientTopicCounterIntervalMs:        1000,
-
-		NodeSystemgeServerCounterIntervalMs:             1000,
-		NodeSystemgeServerRateLimitCounterIntervalMs:    1000,
-		NodeSystemgeServerConnectionCounterIntervalMs:   1000,
-		NodeSystemgeServerAsyncMessageCounterIntervalMs: 1000,
-		NodeSystemgeServerSyncResponseCounterIntervalMs: 1000,
-		NodeSystemgeServerSyncRequestCounterIntervalMs:  1000,
-		NodeSystemgeServerTopicCounterIntervalMs:        1000,
-
-		NodeWebsocketCounterIntervalMs: 1000,
-		HeapUpdateIntervalMs:           1000,
-		NodeSpawnerCounterIntervalMs:   1000,
-		NodeHTTPCounterIntervalMs:      1000,
-		GoroutineUpdateIntervalMs:      1000,
-		AutoStart:                      true,
-		AddDashboardToDashboard:        true,
-	},
-		oauth2Node,
-		Node.New(&Config.NewNode{
-			HttpConfig: &Config.HTTP{
-				ServerConfig: &Config.TcpServer{
-					Port:        8080,
-					TlsCertPath: "MyCertificate.crt",
-					TlsKeyPath:  "MyKey.key",
-				},
-			},
-			WebsocketConfig: &Config.Websocket{
-				Pattern: "/ws",
-				ServerConfig: &Config.TcpServer{
-					Port:        8443,
-					TlsCertPath: "MyCertificate.crt",
-					TlsKeyPath:  "MyKey.key",
-					Blacklist:   []string{},
-					Whitelist:   []string{},
-				},
-				HandleClientMessagesSequentially: false,
-				ClientWatchdogTimeoutMs:          20000,
-				Upgrader: &websocket.Upgrader{
-					ReadBufferSize:  1024,
-					WriteBufferSize: 1024,
-					CheckOrigin: func(r *http.Request) bool {
-						return true
-					},
-				},
-			},
-			NodeConfig: &Config.Node{
-				Name:              "nodeWebsocketHTTP",
-				RandomizerSeed:    Tools.GetSystemTime(),
-				InfoLoggerPath:    LOGGER_PATH,
-				WarningLoggerPath: LOGGER_PATH,
-				ErrorLoggerPath:   LOGGER_PATH,
-			},
-		}, appWebsocketHTTP.New(oauth2Node.GetApplication().(*Oauth2.App))),
-	).StartBlocking()
+	}
 }
