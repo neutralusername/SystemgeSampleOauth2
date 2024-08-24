@@ -2,10 +2,10 @@ module SystemgeSampleOauth2
 
 go 1.23
 
-replace github.com/neutralusername/Systemge => ../Systemge
+//replace github.com/neutralusername/Systemge => ../Systemge
 
 require (
-	github.com/neutralusername/Systemge v0.0.0-20240813150242-e7de682050ae
+	github.com/neutralusername/Systemge v0.0.0-20240824115542-2ef9242d3466
 	golang.org/x/oauth2 v0.21.0
 )
 
