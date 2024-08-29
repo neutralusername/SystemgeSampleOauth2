@@ -5,7 +5,7 @@ go 1.23
 //replace github.com/neutralusername/Systemge => ../Systemge
 
 require (
-	github.com/neutralusername/Systemge v0.0.0-20240829064902-e137852b93ba
+	github.com/neutralusername/Systemge v0.0.0-20240829065729-c60c0b2cbf19
 	golang.org/x/oauth2 v0.21.0
 )
 
