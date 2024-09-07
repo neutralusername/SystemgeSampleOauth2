@@ -22,7 +22,7 @@ import (
 const LOGGER_PATH = "logs.log"
 
 var gmailConfig = &Config.Oauth2{
-	TcpListenerConfig: &Config.TcpListener{
+	TcpServerConfig: &Config.TcpServer{
 		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
@@ -68,7 +68,7 @@ var gmailConfig = &Config.Oauth2{
 }
 
 var discordConfig = &Config.Oauth2{
-	TcpListenerConfig: &Config.TcpListener{
+	TcpServerConfig: &Config.TcpServer{
 		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
@@ -112,45 +112,49 @@ var discordConfig = &Config.Oauth2{
 
 func main() {
 	Tools.NewLoggerQueue(LOGGER_PATH, 10000)
-	oauth2Server := Oauth2Server.New(discordConfig)
+	oauth2Server := Oauth2Server.New("oauth2Server", discordConfig)
 	oauth2Server.Start()
-	websocketServer := WebsocketServer.New(&Config.WebsocketServer{
-		InfoLoggerPath:    LOGGER_PATH,
-		WarningLoggerPath: LOGGER_PATH,
-		ErrorLoggerPath:   LOGGER_PATH,
-		MailerConfig:      nil,
-		Pattern:           "/ws",
-		TcpListenerConfig: &Config.TcpListener{
-			Port:        8443,
-			TlsCertPath: "MyCertificate.crt",
-			TlsKeyPath:  "MyKey.key",
-		},
-		ClientRateLimiterBytes:           nil,
-		ClientRateLimiterMessages:        nil,
-		IncomingMessageByteLimit:         0,
-		HandleClientMessagesSequentially: false,
-		ClientWatchdogTimeoutMs:          60000,
-		Upgrader: &websocket.Upgrader{
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-			CheckOrigin: func(r *http.Request) bool {
-				return true
+	websocketServer := WebsocketServer.New("websocketServer",
+		&Config.WebsocketServer{
+			InfoLoggerPath:    LOGGER_PATH,
+			WarningLoggerPath: LOGGER_PATH,
+			ErrorLoggerPath:   LOGGER_PATH,
+			MailerConfig:      nil,
+			Pattern:           "/ws",
+			TcpServerConfig: &Config.TcpServer{
+				Port:        8443,
+				TlsCertPath: "MyCertificate.crt",
+				TlsKeyPath:  "MyKey.key",
 			},
-		},
-	}, getWebsocketMessageHandlers(oauth2Server), nil, nil)
+			ClientRateLimiterBytes:           nil,
+			ClientRateLimiterMessages:        nil,
+			IncomingMessageByteLimit:         0,
+			HandleClientMessagesSequentially: false,
+			ClientWatchdogTimeoutMs:          60000,
+			Upgrader: &websocket.Upgrader{
+				ReadBufferSize:  1024,
+				WriteBufferSize: 1024,
+				CheckOrigin: func(r *http.Request) bool {
+					return true
+				},
+			},
+		}, getWebsocketMessageHandlers(oauth2Server), nil, nil,
+	)
 	go func() {
 		err := websocketServer.Start()
 		if err != nil {
 			panic(err)
 		}
 	}()
-	httpServer := HTTPServer.New(&Config.HTTPServer{
-		TcpListenerConfig: &Config.TcpListener{
-			Port:        8080,
-			TlsCertPath: "MyCertificate.crt",
-			TlsKeyPath:  "MyKey.key",
-		},
-	}, GgtHTTPMessageHandlers())
+	httpServer := HTTPServer.New("httpServer",
+		&Config.HTTPServer{
+			TcpServerConfig: &Config.TcpServer{
+				Port:        8080,
+				TlsCertPath: "MyCertificate.crt",
+				TlsKeyPath:  "MyKey.key",
+			},
+		}, GgtHTTPMessageHandlers(),
+	)
 	httpServer.Start()
 	time.Sleep(1000 * time.Hour)
 }
