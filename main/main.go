@@ -26,8 +26,6 @@ var gmailConfig = &Config.Oauth2{
 		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
-		Blacklist:   []string{},
-		Whitelist:   []string{},
 	},
 	Oauth2State:                Tools.GenerateRandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs:          15000,
@@ -72,8 +70,6 @@ var discordConfig = &Config.Oauth2{
 		Port:        8082,
 		TlsCertPath: "MyCertificate.crt",
 		TlsKeyPath:  "MyKey.key",
-		Blacklist:   []string{},
-		Whitelist:   []string{},
 	},
 	Oauth2State:                Tools.GenerateRandomString(16, Tools.ALPHA_NUMERIC),
 	SessionLifetimeMs:          15000,
@@ -112,7 +108,7 @@ var discordConfig = &Config.Oauth2{
 
 func main() {
 	Tools.NewLoggerQueue(LOGGER_PATH, 10000)
-	oauth2Server := Oauth2Server.New("oauth2Server", discordConfig)
+	oauth2Server := Oauth2Server.New("oauth2Server", discordConfig, nil, nil)
 	oauth2Server.Start()
 	websocketServer := WebsocketServer.New("websocketServer",
 		&Config.WebsocketServer{
@@ -138,7 +134,10 @@ func main() {
 					return true
 				},
 			},
-		}, getWebsocketMessageHandlers(oauth2Server), nil, nil,
+		},
+		nil, nil,
+		getWebsocketMessageHandlers(oauth2Server),
+		nil, nil,
 	)
 	go func() {
 		err := websocketServer.Start()
@@ -153,7 +152,9 @@ func main() {
 				TlsCertPath: "MyCertificate.crt",
 				TlsKeyPath:  "MyKey.key",
 			},
-		}, GgtHTTPMessageHandlers(),
+		},
+		nil, nil,
+		GgtHTTPMessageHandlers(),
 	)
 	httpServer.Start()
 	time.Sleep(1000 * time.Hour)
