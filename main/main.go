@@ -46,7 +46,7 @@ var gmailConfig = &Config.Oauth2{
 			TokenURL: "https://oauth2.googleapis.com/token",
 		},
 	},
-	TokenHandler: func(oauth2Config *oauth2.Config, token *oauth2.Token) (string, map[string]interface{}, error) {
+	TokenHandler: func(oauth2Config *oauth2.Config, token *oauth2.Token) error {
 		client := oauth2Config.Client(context.Background(), token)
 		resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 		if err != nil {
@@ -87,7 +87,7 @@ var discordConfig = &Config.Oauth2{
 			TokenURL: "https://discord.com/api/oauth2/token",
 		},
 	},
-	TokenHandler: func(oauth2Config *oauth2.Config, token *oauth2.Token) (string, map[string]interface{}, error) {
+	TokenHandler: func(oauth2Config *oauth2.Config, token *oauth2.Token) error {
 		client := oauth2Config.Client(context.Background(), token)
 		resp, err := client.Get("https://discord.com/api/users/@me")
 		if err != nil {
