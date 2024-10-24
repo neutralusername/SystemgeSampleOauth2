@@ -11,4 +11,4 @@ require (
 
 require github.com/gorilla/websocket v1.5.3
 
-require github.com/neutralusername/systemge v0.0.0-20241022114352-b12479a97be2 // indirect
+require github.com/neutralusername/systemge v0.0.0-20241024160200-26abf56e7c16 // indirect
